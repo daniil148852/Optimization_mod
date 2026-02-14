@@ -1,0 +1,93 @@
+name: Build LiteCraft Resource Pack
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # ручной запуск
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Клонируем репозиторий
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Устанавливаем Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 3. Генерируем текстуры
+      - name: Generate textures
+        run: python generate_textures.py
+
+      # 4. Устанавливаем Java (нужна для jar)
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # 5. Собираем JAR
+      - name: Build JAR
+        run: |
+          cd output/LiteCraft-RP
+          jar cf ../../LiteCraft-ResourcePack.jar .
+          cd ../..
+          echo "=== JAR contents ==="
+          jar tf LiteCraft-ResourcePack.jar | head -50
+          echo "..."
+          jar tf LiteCraft-ResourcePack.jar | wc -l
+          echo "total entries"
+          ls -lh LiteCraft-ResourcePack.jar
+
+      # 6. Загружаем артефакт
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LiteCraft-ResourcePack
+          path: LiteCraft-ResourcePack.jar
+          retention-days: 90
+
+  # ===========================================
+  # Автоматический релиз при пуше тега
+  # ===========================================
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build JAR
+        run: |
+          cd output/LiteCraft-RP
+          jar cf ../../LiteCraft-ResourcePack.jar .
+          cd ../..
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: LiteCraft-ResourcePack.jar
+          generate_release_notes: true

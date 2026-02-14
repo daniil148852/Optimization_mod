@@ -22,10 +22,6 @@ jobs:
         with:
           python-version: '3.11'
 
-      # 3. Генерируем текстуры
-      - name: Generate textures
-        run: python generate_textures.py
-
       # 4. Устанавливаем Java (нужна для jar)
       - name: Setup Java
         uses: actions/setup-java@v4

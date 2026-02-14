@@ -1,10 +1,8 @@
 {
   "required": true,
+  "minVersion": "0.8",
   "package": "com.litecraft.mixin",
   "compatibilityLevel": "JAVA_17",
-  "mixins": [
-    "server.ThreadedAnvilChunkStorageMixin"
-  ],
   "client": [
     "client.WorldRendererMixin",
     "client.ParticleManagerMixin",
@@ -13,6 +11,9 @@
     "client.MinecraftClientMixin",
     "client.BiomeColorsMixin",
     "client.EntityRendererMixin"
+  ],
+  "server": [
+    "server.ThreadedAnvilChunkStorageMixin"
   ],
   "injectors": {
     "defaultRequire": 1
